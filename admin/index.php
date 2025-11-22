@@ -11,6 +11,7 @@ if(empty($_SESSION['user_id'] || $_SESSION['logged_in'])){
     <!-- /.content-header -->
 
  <div class="content">
+
   <div class="container-fluid">
     <div class="row-md-12">
       <section class="content">

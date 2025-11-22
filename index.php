@@ -1,3 +1,13 @@
+<?php
+require 'config/config.php';
+
+session_start();
+if(empty($_SESSION['user_id'] || $_SESSION['logged_in'])){
+  header("Location: login.php");
+};
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 </head>
 <body class="hold-transition sidebar-mini">
-<div>
+<div class = "wrapper">
   <!-- Navbar -->
   
   <!-- /.navbar -->
@@ -25,7 +35,7 @@
 
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="">
+  <div class="contant-wrapper" style="margin-left:0 ; !important;">
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="container-fluid">
@@ -35,81 +45,72 @@
           
       </div><!-- /.container-fluid -->
     </section>
+    <?php 
+
+    if(!empty($_GET['pageno'])){
+      $pageno = $_GET['pageno'];
+    }else{
+      $pageno = 1;
+    };
+    $numOfrec = 3;
+    $offset = ($pageno - 1) * $numOfrec;
+
+  
+    $stmt = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+    $stmt->execute();
+    $Rawresult = $stmt->fetchAll();
+    
+    $totalpages = ceil(count($Rawresult)/$numOfrec);
+
+    $stmt = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC LIMIT $offset,$numOfrec ");
+   $stmt->execute();
+    $result = $stmt->fetchAll();
+    ?>
 
     <!-- Main content -->
  <section class="content">
   <div class="row">
+    <?php 
+    if($result){
+     foreach ($result as $value) {
+  
 
+
+      ?>
     <div class="col-md-4">
       <div class="card card-widget">
-        <div class="card-header text-center">
-          <h4>blog title</h4>
+        <div class="card-header">
+          <div style="text-align:center  !important ;float :none;" class="card-title"></div>
+          <h4><?php echo $value['title'] ?></h4>
         </div>
         <div class="card-body">
-          <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
+          <a href="blogDetail.php?id=<?php echo $value['id'] ; ?>"><img class="img-fluid pad" style="height: 200px; !important;" src="admin/image/<?php echo $value['image'] ?>" alt="Photo"></a>
         </div>
       </div>
     </div>
+  
+  <?php
+  
+ }}
+  ?>
+                <nav aria-label="Page navigation example" style="margin-left: 30px ;float: right !important;">
+  <ul class="pagination">
+    <li class="page-item"><a class="page-link" href="<?php echo '?pageno=1' ?>">First</a></li>
 
-    <div class="col-md-4">
-      <div class="card card-widget">
-        <div class="card-header text-center">
-          <h4>blog title</h4>
-        </div>
-        <div class="card-body">
-          <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-        </div>
-      </div>
-    </div>
+    <li class="page-item<?php if($pageno<=0){echo 'error';} ?>"><a class="page-link
+    
+    
+    " href="<?php if($pageno > 1){echo'?pageno='.$pageno-1 ;}else{echo '#';}?>">previous</a></li>
 
-    <div class="col-md-4">
-      <div class="card card-widget">
-        <div class="card-header text-center">
-          <h4>blog title</h4>
-        </div>
-        <div class="card-body">
-          <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-        </div>
-      </div>
-    </div>
+    <li class="page-item"><a class="page-link" href="#"><?php echo $pageno ?></a></li>
 
+    <li class="page-item<?php if($pageno >= $totalpages){echo 'disabled';}?>"><a class="page-link" href="<?php if($pageno <  $totalpages  ){echo'?pageno='.$pageno+1 ;}else{echo '#';}?>">Next</a></li>
+
+    <li class="page-item"><a class="page-link" href="?pageno=<?php echo $totalpages?>">Last</a></li>
+  </ul>
+</nav>
   </div>
-  <div class="row">
-
-    <div class="col-md-4">
-      <div class="card card-widget">
-        <div class="card-header text-center">
-          <h4>blog title</h4>
-        </div>
-        <div class="card-body">
-          <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card card-widget">
-        <div class="card-header text-center">
-          <h4>blog title</h4>
-        </div>
-        <div class="card-body">
-          <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card card-widget">
-        <div class="card-header text-center">
-          <h4>blog title</h4>
-        </div>
-        <div class="card-body">
-          <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-        </div>
-      </div>
-    </div>
-
-  </div>
+ 
 </section>
 
     <!-- /.content -->
@@ -126,6 +127,7 @@
     </div>
     <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
     reserved.
+    <a href="logout.php" class='btn btn-default'>Logout</a>
   </footer>
 
   <!-- Control Sidebar -->

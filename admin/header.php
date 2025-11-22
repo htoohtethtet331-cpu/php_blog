@@ -127,8 +127,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
             </a>
           </li>
         </ul>
-                      <a href="logout.php" type="button" style="float:left-button;" class="btn btn-default">out</a>
-      </nav>
+        <br><br><div class="container">
+                      <a href="userM.php" type="button" style="float:left-button;" class="btn btn-success btn-block">User Management</a>
+     </div> 
+          
+     <br>
+    <div class="container">
+                      <a href="logout.php" type="button" style="float:left-button;" class="btn btn-default btn-block">out</a>
+     </div>
+    </nav>
       <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->

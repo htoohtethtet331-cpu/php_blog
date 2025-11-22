@@ -1,3 +1,48 @@
+<?php 
+require 'config/config.php';
+session_start();
+if(empty($_SESSION['user_id']) || empty($_SESSION['logged_in'])){
+  header("location: login.php");
+
+}
+
+
+$stmt = $pdo->prepare("SELECT * FROM posts WHERE id=".$_GET['id']);
+$stmt->execute();
+$result =  $stmt->fetchAll();
+
+$blogid = $_GET['id'];
+$cmstmt = $pdo->prepare("SELECT * FROM comments WHERE post_id=$blogid");
+$cmstmt->execute();
+$cmresult =  $cmstmt->fetchAll();
+
+$author_id = $cmresult[0]['author_id'];
+$austmt = $pdo->prepare("SELECT * FROM users WHERE id=$author_id");
+$austmt->execute();
+$auresult =  $austmt->fetchAll();
+
+
+if($_POST){
+  $comment = $_POST['comment'];
+
+  $stmt = $pdo->prepare("INSERT INTO comments (content, author_id, post_id)
+                         VALUES (:content, :author_id, :post_id)");
+
+  $result = $stmt->execute([
+      ':content' => $comment,
+      ':author_id' => $_SESSION['user_id'],
+      ':post_id' => $blogid
+  ]);
+
+  if($result){
+      header("Location: blogDetail.php?id=".$_GET['id']);
+      exit;
+  }
+}
+
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,7 +61,7 @@
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 </head>
 <body class="hold-transition sidebar-mini">
-<div>
+<div class="wrapper">
   <!-- Navbar -->
   
   <!-- /.navbar -->
@@ -25,13 +70,12 @@
 
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="">
+  <div class="content-wrapper" style="margin-left: 0; !important ;">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <div class="container-fluid">
+ 
         
-      </div><!-- /.container-fluid -->
-    </section>
+
+ 
 
     <!-- Main content -->
   <section  class="content">
@@ -40,20 +84,21 @@
             <!-- Box Comment -->
             <div class="card card-widget">
               <section class="content-header">
-      <div class="container-fluid">
-        
-        
+         <div style='text-align:center ;!important ; float:none ;' class="card-title"></div>
+           
+  
             <h1 style="text-align:center">Blog site</h1>
-          
-      </div><!-- /.container-fluid -->
-    </section>
+              <h4 style="text-align:center ; !important ;"><?php echo $result[0]['title']?></h4>
+  
               <!-- /.card-header -->
               <div class="card-body">
-                <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
+                <img class="img-fluid pad" src="admin/image/<?php echo $result[0]['image']?>" style="width:100% ; margin: auto 14px;"; alt="Photo">
 
-                <p>I took this photo this morning. What do you guys think?</p>
-                <button type="button" class="btn btn-default btn-sm"><i class="fas fa-share"></i> Share</button>
-                <button type="button" class="btn btn-default btn-sm"><i class="far fa-thumbs-up"></i> Like</button>
+                <br>
+                <p><?php echo $result[0]['content']; ?></p>
+ <br><br>
+ <h2>Comment</h2>
+ <hr>
                 <span class="float-right text-muted">127 likes - 3 comments</span>
               </div>
               <!-- /.card-body -->
@@ -64,11 +109,14 @@
 
                   <div class="comment-text">
                     <span class="username">
-                      Maria Gonzales
-                      <span class="text-muted float-right">8:03 PM Today</span>
+                      <?php 
+                      echo $auresult[0]['name'];
+                      ?>
+                      <span class="text-muted float-right"><?php date("d-m-y",strtotime($cmresult[0]['created_at'])) ?></span>
                     </span><!-- /.username -->
-                    It is a long established fact that a reader will distracted
-                    by the readable content of a page when looking at its layout.
+                    <?php
+                    echo $cmresult[0]['content']
+                    ?>
                   </div>
                   <!-- /.comment-text -->
                 </div>
@@ -91,11 +139,11 @@
               </div>
               <!-- /.card-footer -->
               <div class="card-footer">
-                <form action="#" method="post">
+                <form action="" method="post">
                   <img class="img-fluid img-circle img-sm" src="dist/img/user4-128x128.jpg" alt="Alt Text">
                   <!-- .img-push is used to add margin to elements next to floating images -->
                   <div class="img-push">
-                    <input type="text" class="form-control form-control-sm" placeholder="Press enter to post comment">
+                    <input type="text" name="comment" class="form-control form-control-sm" placeholder="Press enter to post comment">
                   </div>
                 </form>
               </div>
