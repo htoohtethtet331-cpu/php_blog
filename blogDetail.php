@@ -16,12 +16,16 @@ $cmstmt = $pdo->prepare("SELECT * FROM comments WHERE post_id=$blogid");
 $cmstmt->execute();
 $cmresult =  $cmstmt->fetchAll();
 
-$author_id = $cmresult[0]['author_id'];
+$auresult = [];
+if($cmresult){
+  foreach($cmresult as $key => $value){
+ 
+$author_id = $cmresult[$key]['author_id'];
 $austmt = $pdo->prepare("SELECT * FROM users WHERE id=$author_id");
 $austmt->execute();
-$auresult =  $austmt->fetchAll();
-
-
+$auresult[]=  $austmt->fetchAll(); 
+}
+}
 if($_POST){
   $comment = $_POST['comment'];
 
@@ -105,42 +109,40 @@ if($_POST){
               <div class="card-footer card-comments">
                 <div class="card-comment">
                   <!-- User image -->
-                  <img class="img-circle img-sm" src="dist/img/user3-128x128.jpg" alt="User Image">
-
+                  <?php 
+                  if($cmresult){
+                  ?>
+                  
                   <div class="comment-text">
-                    <span class="username">
-                      <?php 
-                      echo $auresult[0]['name'];
+                    <?php 
+                    if($cmresult){
+                      foreach ($cmresult as $key => $value) {
+                        ?>
+                        <span class="username">
+                      <?php  
+                      echo $auresult[$key][0]['name'] ;
                       ?>
-                      <span class="text-muted float-right"><?php date("d-m-y",strtotime($cmresult[0]['created_at'])) ?></span>
+                      <span class="text-muted float-right"><?php date("d-m-y",strtotime($value['created_at'])) ?></span>
                     </span><!-- /.username -->
                     <?php
-                    echo $cmresult[0]['content']
+                    echo $value['content'] ?> <hr>
+                   <?php
+                      }
+                    }
                     ?>
                   </div>
+                  <?php
+                  }
+                  ?>
                   <!-- /.comment-text -->
                 </div>
                 <!-- /.card-comment -->
-                <div class="card-comment">
-                  <!-- User image -->
-                  <img class="img-circle img-sm" src="dist/img/user4-128x128.jpg" alt="User Image">
-
-                  <div class="comment-text">
-                    <span class="username">
-                      Luna Stark
-                      <span class="text-muted float-right">8:03 PM Today</span>
-                    </span><!-- /.username -->
-                    It is a long established fact that a reader will distracted
-                    by the readable content of a page when looking at its layout.
-                  </div>
-                  <!-- /.comment-text -->
-                </div>
+                
                 <!-- /.card-comment -->
               </div>
               <!-- /.card-footer -->
               <div class="card-footer">
                 <form action="" method="post">
-                  <img class="img-fluid img-circle img-sm" src="dist/img/user4-128x128.jpg" alt="Alt Text">
                   <!-- .img-push is used to add margin to elements next to floating images -->
                   <div class="img-push">
                     <input type="text" name="comment" class="form-control form-control-sm" placeholder="Press enter to post comment">
